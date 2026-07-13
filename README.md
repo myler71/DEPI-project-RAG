@@ -7,6 +7,7 @@ Built as the team project for the **Digital Egypt Pioneers Initiative (DEPI)** �
 ## Key Features
 
 - **RUL Prediction** — XGBoost regression model with SHAP explainability
+- **MLflow Experiment Tracking** — Log params, metrics, model artifacts, and visualizations for training runs
 - **AI Assistant (RAG)** — Chat with your maintenance knowledge base via Groq-hosted LLM + FAISS
 - **Dashboard & Reports** — KPIs, health distribution, prediction trends, engineer activity, critical engine alerts
 - **Maintenance Management** — Log, track, and search maintenance records per engine
@@ -19,7 +20,8 @@ Built as the team project for the **Digital Egypt Pioneers Initiative (DEPI)** �
 |-------|-----------|
 | Frontend | Streamlit (multi-page app) |
 | Backend / ML | Python 3.11, XGBoost, scikit-learn, SHAP |
-| RAG | sentence-transformers, FAISS, OpenAI client (LM Studio) |
+| Experiment Tracking | MLflow (training logs, inference monitoring) |
+| RAG | sentence-transformers, FAISS, OpenAI client (Groq API) |
 | Database | SQLite |
 | Visualization | Plotly, Matplotlib |
 | Reporting | ReportLab (PDF), openpyxl (Excel) |
@@ -42,9 +44,10 @@ Built as the team project for the **Digital Egypt Pioneers Initiative (DEPI)** �
 │       └── path_setup.py          # sys.path configuration
 ├── ai/
 │   ├── predict.py                 # XGBoost prediction (Predictor class)
+│   ├── train.py                   # MLflow training experiments
 │   ├── explain.py                 # SHAP explainability (Explainability class)
 │   ├── preprocessing.py           # Feature scaling & validation
-│   ├── rag.py                     # RAG engine (FAISS + LM Studio)
+│   ├── rag.py                     # RAG engine (FAISS + Groq)
 │   └── model/
 │       ├── xgboost_rul_model.pkl  # Trained XGBoost model
 │       ├── standard_scaler.pkl    # Feature scaler
@@ -65,6 +68,11 @@ Built as the team project for the **Digital Egypt Pioneers Initiative (DEPI)** �
 │   ├── models.py                  # Schema creation (CREATE TABLE)
 │   ├── queries.py                 # CRUD operations
 │   └── maintenance.db             # SQLite database
+├── notebooks/
+│   ├── MLflow_Integration_Demo.ipynb  # MLflow demo notebook
+│   ├── depi_RAG.ipynb                 # RAG notebook
+│   └── depi_rag.py                    # RAG script
+├── mlruns/                            # MLflow experiment tracking data
 ├── data/
 │   └── knowledge_base.txt         # RAG knowledge base document
 ├── run.py                         # App entry point
@@ -95,6 +103,7 @@ xgboost>=2.0
 openai>=1.0
 sentence-transformers>=3.0
 faiss-cpu>=1.8
+mlflow>=2.0
 ```
 
 ### External Services (for RAG)
@@ -148,6 +157,27 @@ The app opens at **http://localhost:8501**.
    - **General User** — high-level summary with optional depth
 
 ## Changelog
+
+### v3.0 — MLflow Integration
+
+**New:**
+- **Training experiments with MLflow** — `ai/train.py` runs 6 XGBoost experiments with different hyperparameters (baseline, deeper, more trees, lower LR, subsample, custom). Each run logs params, metrics (RMSE, MAE, R2, MAPE), model artifacts, and 5 plots (RUL distribution, prediction vs actual, feature importance, residuals, health distribution).
+- **Batch inference monitoring** — `application/prediction/service.py` now logs batch prediction metrics to a separate MLflow experiment ("Predictive Maintenance - Inference") tracking avg/min/max/std/median RUL and engine health counts.
+- **MLflow Demo Notebook** — `notebooks/MLflow_Integration_Demo.ipynb` shows MLflow basics for the project's models.
+
+**How to use:**
+```bash
+# Run training experiments
+python ai/train.py
+
+# Run with custom params
+python ai/train.py -n 200 -d 8 -lr 0.1
+
+# Open MLflow UI
+mlflow ui
+```
+
+Then open http://localhost:5000 to compare experiments.
 
 ### v2.0 — Groq Migration & Bug Fixes
 
