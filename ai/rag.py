@@ -9,15 +9,15 @@ class RAGEngine:
     """
     RAG Engine based on the notebook implementation.
     Uses sentence-transformers for embeddings and FAISS for vector search.
-    Connects to LM Studio via OpenAI-compatible API.
+    Connects to Groq via OpenAI-compatible API.
     """
 
     def __init__(
         self,
         knowledge_path: str,
-        lm_studio_url: str = "http://127.0.0.1:1234/v1",
+        groq_api_key: str = "",
         embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2",
-        llm_model: str = "google/gemma-4-e4b",
+        llm_model: str = "llama-3.3-70b-versatile",
         chunk_size: int = 120,
         chunk_overlap: int = 20,
     ):
@@ -29,7 +29,10 @@ class RAGEngine:
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         
-        self.client = OpenAI(base_url=lm_studio_url, api_key="lm-studio")
+        self.client = OpenAI(
+            base_url="https://api.groq.com/openai/v1",
+            api_key=groq_api_key,
+        )
         self._embed_model = SentenceTransformer(embedding_model)
         self._chunks = []
         self._index = None
